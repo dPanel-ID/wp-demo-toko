@@ -1,4 +1,38 @@
-## WordPress Example
+## WordPress demo: wp-toko
+
+This repository is a **tutorial example**. It is one of two WordPress sites
+(`wp-demo-toko` and `wp-demo-blog`) that run on the same server through
+dPanel, each under its **own service account** and its own Linux user, so one
+site cannot read or change the other's files or database.
+
+- Same code everywhere: this repository is what runs on your computer and on
+  the server. Every change goes through a pull request, so the history shows
+  who changed what and when.
+- The sister site is [dPanel-ID/wp-demo-blog](https://github.com/dPanel-ID/wp-demo-blog).
+- Based on [dPanel-ID/wordpress-example](https://github.com/dPanel-ID/wordpress-example).
+
+### Run it on your computer
+
+You need [Docker](https://docs.docker.com/get-docker/). Nothing else is installed
+on your machine.
+
+```bash
+docker compose -f compose.local.yaml up --build
+```
+
+Open http://localhost:8080 and finish the WordPress installer. The site runs the
+same `./scripts/build.sh` and `./scripts/start.sh` that dPanel runs in
+production, with FrankenPHP and PHP 8.5, and a local MariaDB.
+
+The database password in `compose.local.yaml` is for this local copy only.
+On the server, dPanel creates the database and its password for you
+(application settings, **Database for this app**), so no password is ever
+written in this repository.
+
+Stop it with `docker compose -f compose.local.yaml down` (add `-v` to delete the
+local database too).
+
+## How the template works
 Deploy wordpress from github repository through dPanel without docker. The wordpress will running behind load balancer. The load balancer will forward the request to the wordpress server which running in defined port.
 
 ### Development

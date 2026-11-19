@@ -1,0 +1,52 @@
+# Run this WordPress site on your own computer with the same code as production.
+#
+#   docker compose -f compose.local.yaml up --build
+#   open http://localhost:8080
+#
+# The database password below is for this local copy only. Never reuse it on a
+# server: in production dPanel creates the database and its password for you.
+services:
+  db:
+    image: mariadb:11.8
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: local-only-password
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: local/Dockerfile
+    working_dir: /srv/site
+    volumes:
+      - .:/srv/site
+    environment:
+      PORT: "8080"
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: local-only-password
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_HOME: http://localhost:8080
+      WORDPRESS_SITEURL: http://localhost:8080
+      WORDPRESS_MEMORY_LIMIT: 256M
+    # The same scripts dPanel runs on the server.
+    command: ["bash", "-c", "./scripts/build.sh && exec ./scripts/start.sh"]
+    ports:
+      - "8080:8080"
+    # The FrankenPHP image checks Caddy's admin endpoint, which the site turns off.
+    healthcheck:
+      disable: true
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db:

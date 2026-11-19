@@ -5,3 +5,6 @@ development/
 # Ignore files
 .DS_Store
 .env
+
+# Local copy (compose.local.yaml)
+run/
